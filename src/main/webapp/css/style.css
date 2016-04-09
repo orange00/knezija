@@ -1,0 +1,36 @@
+.footer{
+    position: fixed;
+    background-color: #707070;
+    height: 50px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    margin-top: 30px;
+    margin-bottom: 0px;
+    padding-top: 15px;
+}
+
+#copy {
+    text-align: center;
+    color: white;
+}
+
+.col-md-4 {
+        text-align: center;	
+}
+
+.botun {
+        background-color: #707070;
+        border:none;	
+}
+
+.image-wrap {
+	display: inline-block;
+	position: relative;
+}
+
+.upper-right {
+	position: absolute;
+	top: 5%;
+	right: 5%;
+}
