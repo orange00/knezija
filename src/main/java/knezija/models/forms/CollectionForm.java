@@ -13,36 +13,45 @@ public class CollectionForm {
 	private String[] collectionContentTypes;
 	@NotEmpty(message = "Morate odabrati javnost mape")
 	private String publicCollection;
-	
-	
+
 	public String getTitle() {
 		return title;
 	}
+
 	public void setTitle(String title) {
 		this.title = title;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
 	public String[] getCollectionContentTypes() {
 		return collectionContentTypes;
 	}
+
 	public void setCollectionContentTypes(String[] collectionContentTypes) {
 		this.collectionContentTypes = collectionContentTypes;
 	}
+
 	public String getPublicCollection() {
 		return publicCollection;
 	}
+
 	public void setPublicCollection(String publicCollection) {
 		this.publicCollection = publicCollection;
 	}
+
 	public String getAuthor() {
 		return author;
 	}
+
 	public void setAuthor(String author) {
 		this.author = author;
 	}
+
 }

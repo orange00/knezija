@@ -38,10 +38,10 @@
 								<option value="${user.username}">${user.username}</option>
 							</c:forEach>
 						</select> <br>
-						<button type="submit" name="service" value="deleteUser"
-							class="btn btn-primary">Izbriši korisnika</button>
 						<button type="submit" name="service" value="updateData"
 							class="btn btn-primary">Izmijeni podatke korisnika</button>
+						<button type="submit" name="service" value="deleteUser"
+							class="btn btn-danger">Izbriši korisnika</button>
 					</div>
 				</form>
 			</div>

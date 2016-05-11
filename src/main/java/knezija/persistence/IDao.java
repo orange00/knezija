@@ -3,6 +3,7 @@ package knezija.persistence;
 import java.util.List;
 import java.util.Map;
 
+import knezija.models.Blagoslov;
 import knezija.models.Krstenje;
 
 public interface IDao {
@@ -92,6 +93,27 @@ public interface IDao {
 	 */
 	<T> List<T> findAll(Class<T> entityClass, String fieldName,
 			Object fieldValue);
+	
+	<T> List<T> findAll(Class<T> entityClass, String fieldName1,
+			Object fieldValue1, String fieldName2,
+			Object fieldValue2);
+	
+	<T> List<T> findAll(Class<T> entityClass, String fieldName1,
+			Object fieldValue1, String fieldName2,
+			Object fieldValue2, String fieldName3,
+			Object fieldValue3);
 
 	<T> void removeById(Class<T> entityClass, long id);
+
+	/**
+	 * Finds all the records. The given sqlAddition will be 
+	 * appended to the generated sql query before execution.
+	 * @param entityClass
+	 * @param fieldName
+	 * @param fieldValue
+	 * @param sqlAddition
+	 * @return
+	 */
+	<T> List<T> findAllWithAddition(Class<T> entityClass, String fieldName,
+			Object fieldValue, String sqlAddition);
 }

@@ -56,6 +56,7 @@
 	right: 0;
 	bottom: 0;
 }
+
 .bottom-left {
 	position: absolute;
 	left: 0;
@@ -89,6 +90,10 @@ body {
 	font-size: large;
 	font-family: cursive;
 }
+
+.text-black {
+	color: #3B3131;
+}
 </style>
 <title>Pregled mape</title>
 </head>
@@ -96,21 +101,25 @@ body {
 	<jsp:include page="/WEB-INF/jsp/header.jsp"></jsp:include>
 	<div class="left-margin">
 		<div class="row">
-			<div class="col-md-9">
+			<div class="col-md-8">
 				<h2>${collection.title}</h2>
 			</div>
 			<div class="col-md-1">
+				<a href="/knezija/collections/${id}/create-post-view"><button
+						class="btn btn-info btn-sm">Dodaj objavu..</button></a>
+			</div>
+			<div class="col-md-1">
 				<a href="/knezija/collections/${id}/create-content-view"><button
-						class="btn btn-info">Dodaj sadržaj..</button></a>
+						class="btn btn-info btn-sm">Dodaj sadržaj..</button></a>
 			</div>
 			<div class="col-md-2">
 				<a href="/knezija/collections/${id}/create"><button
-						class="btn btn-primary">Dodaj podmapu..</button></a>
+						class="btn btn-primary btn-sm">Dodaj podmapu..</button></a>
 			</div>
 		</div>
 		<!-- The Bootstrap Image Gallery lightbox, should be a child element of the document body -->
 		<div id="blueimp-gallery" class="blueimp-gallery"
-			data-use-bootstrap-modal="false">
+			data-use-bootstrap-modal="true">
 			<!-- The container for the modal slides -->
 			<div class="slides"></div>
 			<!-- Controls for the borderless lightbox -->
@@ -161,19 +170,37 @@ body {
 			<c:forEach items="${contentList}" var="content">
 				<c:choose>
 					<c:when test="${content.type.typeName == 'Slika'}">
-						<a href="/knezija/collections/${id}/content/${content.id}/binary"
+						<a href="/knezija/collections/${id}/content/${content.id}/image"
 							title="${content.title}" data-gallery>
 							<div class="image-wrap gallery-element">
 								<img
 									src="/knezija/collections/${id}/content/${content.id}/image/300"
-									alt="${content.title}"> <a
-									href="/knezija/collections/${id}/update-content-view/${content.id}"><button
-										name="showHide" class="btn btn-primary upper-right">
-										<b>Uredi</b>
-									</button></a>
+									alt="${content.title}">
+								<button name="showHide" class="btn btn-primary upper-right"
+									onclick="window.location='/knezija/collections/${id}/update-content-view/${content.id}';">
+									<b>Uredi</b>
+								</button>
 								<h3 class="title-bottom text-center">
 									<b>${content.title}</b>
 								</h3>
+							</div>
+						</a>
+					</c:when>
+					<c:when test="${content.type.typeName == 'Objava'}">
+						<a href="/knezija/collections/${id}/content/${content.id}/binary"
+							title="${content.title}">
+							<div class="image-wrap gallery-element">
+								<img
+									src="/knezija/collections/${id}/content/${content.id}/image/150"
+									alt="${content.title}"> <a
+									href="/knezija/collections/${id}/update-post-view/${content.id}">
+									<button name="showHide" class="btn btn-primary upper-right">
+										<b>Uredi</b>
+									</button>
+								</a>
+								<h5 class="title-bottom text-center text-black">
+									<b>${content.title}</b>
+								</h5>
 							</div>
 						</a>
 					</c:when>
@@ -185,11 +212,11 @@ body {
 							<div class="image-wrap gallery-element">
 								<img
 									src="/knezija/collections/${id}/content/${content.id}/image/300"
-									alt="${content.title}"> <a
-									href="/knezija/collections/${id}/update-content-view/${content.id}"><button
-										name="showHide" class="btn btn-primary upper-right">
-										<b>Uredi</b>
-									</button></a>
+									alt="${content.title}">
+								<button name="showHide" class="btn btn-primary upper-right"
+									onclick="window.location='/knezija/collections/${id}/update-content-view/${content.id}';">
+									<b>Uredi</b>
+								</button>
 								<h3 class="title-bottom text-center">
 									<b>${content.title}</b>
 								</h3>
@@ -210,7 +237,7 @@ body {
 									href="/knezija/collections/${id}/update-content-view/${content.id}"><button
 										name="showHide" class="btn btn-primary bottom-right">
 										<b>Uredi</b>
-									</button></a> 
+									</button></a>
 								<h5>
 									<b>${content.title}</b>
 								</h5>

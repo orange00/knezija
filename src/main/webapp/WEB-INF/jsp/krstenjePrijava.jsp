@@ -15,7 +15,13 @@
 <%@ include file="/html/include.html"%>
 <title>Prijava za krštenje</title>
 </head>
+
+<style type="text/css">
+</style>
+
 <body>
+	<p id="isDisabled" style="display: none;">${isFormDisabled}</p>
+
 	<jsp:include page="/WEB-INF/jsp/header.jsp"></jsp:include>
 	<div class="container">
 		<h3 class="text-success">${successMessage}</h3>
@@ -25,10 +31,10 @@
 				<b>ZAMOLBA ZA KRŠTENJE DJETETA</b>
 			</h3>
 			<br>
-			<div class="col-md-12">
-				<springForm:form id="form" role="form" method="POST"
-					enctype="multipart/form-data" commandName="krstenjeForm"
-					action="/knezija/prijave/krstenje/spremi">
+			<springForm:form id="form" role="form" method="POST"
+				enctype="multipart/form-data" commandName="krstenjeForm"
+				action="/knezija/sakramenti/krstenje/prijava/save">
+				<div class="col-md-12">
 					<label><i>Otac</i></label>
 					<div class="form-group row">
 						<div class="col-md-2">
@@ -134,7 +140,7 @@
 					<div class="form-group row">
 						<div class="col-md-4">
 							<springForm:input type="number" class="form-control"
-								placeholder="Unesite kontakt broj" path="brojTelefona" />
+								placeholder="Unesite kontakt telefon" path="brojTelefona" />
 							<springForm:errors path="brojTelefona" cssClass="form-error" />
 						</div>
 						<div class="col-md-4">
@@ -144,159 +150,170 @@
 						</div>
 					</div>
 					<div class="col-md-4"></div>
-			</div>
+					<br>
+				</div>
 
-			<br> <br>
-			<h4 class="text-center">
-				<b>Molimo da naše dijete bude kršteno rimokatoličkim obredom:</b>
-			</h4>
-			<br>
-			<div class="form-group row">
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite ime djeteta" path="imeDjeteta" />
-					<springForm:errors path="imeDjeteta" cssClass="form-error" />
-				</div>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite prezime djeteta" path="prezimeDjeteta" />
-					<springForm:errors path="prezimeDjeteta" cssClass="form-error" />
-				</div>
-				<div class="col-md-3">
-					<springForm:input type="number" class="form-control"
-						placeholder="Unesite OIB djeteta" path="OIBDjeteta" />
-					<springForm:errors path="OIBDjeteta" cssClass="form-error" />
-				</div>
-				<div class="col-md-3">
-					<label><b>Spol:</b></label>
-					<springForm:radiobutton path="spol" value="M" />
-					Muško
-					<springForm:radiobutton path="spol" value="F" />
-					Žensko
-					<springForm:errors path="spol" cssClass="form-error" />
-				</div>
-			</div>
 
-			<label><i>Rođenje djeteta</i></label>
-			<div class="form-group row">
-				<div class="col-md-3">
-					<springForm:input type="date" class="form-control"
-						placeholder="Unesite datum rođenja" path="datumRodjenja" />
-					<springForm:errors path="datumRodjenja" cssClass="form-error" />
+				<h4 class="text-center">
+					<b>Molimo da naše dijete bude kršteno rimokatoličkim obredom:</b>
+				</h4>
+				<br>
+				<div class="form-group row">
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite ime djeteta" path="imeDjeteta" />
+						<springForm:errors path="imeDjeteta" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite prezime djeteta" path="prezimeDjeteta" />
+						<springForm:errors path="prezimeDjeteta" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<springForm:input type="number" class="form-control"
+							placeholder="Unesite OIB djeteta" path="OIBDjeteta" />
+						<springForm:errors path="OIBDjeteta" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<label><b>Spol:</b></label><br>
+						<springForm:radiobutton path="spol" value="M" />
+						Muško
+						<springForm:radiobutton path="spol" value="F" />
+						Žensko
+						<springForm:errors path="spol" cssClass="form-error" />
+					</div>
 				</div>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite mjesto rođenja" path="mjestoRodjenja" />
-					<springForm:errors path="mjestoRodjenja" cssClass="form-error" />
-				</div>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="(prvo, drugo,treće,...) dijete u obitelji"
-						path="redniBrojDjeteta" />
-					<springForm:errors path="redniBrojDjeteta" cssClass="form-error" />
-				</div>
-				<div class="col-md-3">
-					<label><b>Dijete:</b></label>
-					<springForm:radiobutton path="zakonitoIliCivilno" value="zakonito" />
-					Zakonito
-					<springForm:radiobutton path="zakonitoIliCivilno"
-						value="civilno zakonito" />
-					Civilno zakonito
-					<springForm:errors path="spol" cssClass="form-error" />
-				</div>
-			</div>
 
-			<label><i>Kumovi</i></label>
-			<div class="form-group row">
-				<label>1.</label>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite ime kuma/kume" path="imeKuma1" />
-					<springForm:errors path="imeKuma1" cssClass="form-error" />
+				<label><i>Rođenje djeteta</i></label>
+				<div class="form-group row">
+					<div class="col-md-3">
+						<springForm:input type="date" class="form-control"
+							placeholder="Unesite datum rođenja" path="datumRodjenja" />
+						<springForm:errors path="datumRodjenja" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite mjesto rođenja" path="mjestoRodjenja" />
+						<springForm:errors path="mjestoRodjenja" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="(prvo, drugo,treće,...) dijete u obitelji"
+							path="redniBrojDjeteta" />
+						<springForm:errors path="redniBrojDjeteta" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<label><b>Dijete:</b></label><br>
+						<springForm:radiobutton path="zakonitoIliCivilno" value="zakonito" />
+						Zakonito
+						<springForm:radiobutton path="zakonitoIliCivilno"
+							value="civilno zakonito" />
+						Civilno zakonito
+						<springForm:errors path="zakonitoIliCivilno" cssClass="form-error" />
+					</div>
 				</div>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite prezime kuma/kume" path="prezimeKuma1" />
-					<springForm:errors path="prezimeKuma1" cssClass="form-error" />
-				</div>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite crkvu/župu kuma/kume" path="zupaKuma1" />
-					<springForm:errors path="zupaKuma1" cssClass="form-error" />
-				</div>
-			</div>
 
-			<div class="form-group row">
-				<label>2.</label>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite ime kuma/kume" path="imeKuma2" />
-					<springForm:errors path="imeKuma2" cssClass="form-error" />
+				<label><i>Kumovi</i></label>
+				<div class="form-group row">
+					<label>1.</label>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite ime kuma/kume" path="imeKuma1" />
+						<springForm:errors path="imeKuma1" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite prezime kuma/kume" path="prezimeKuma1" />
+						<springForm:errors path="prezimeKuma1" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite crkvu/župu kuma/kume" path="zupaKuma1" />
+						<springForm:errors path="zupaKuma1" cssClass="form-error" />
+					</div>
 				</div>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite prezime kuma/kume" path="prezimeKuma2" />
-					<springForm:errors path="prezimeKuma2" cssClass="form-error" />
+
+				<div class="form-group row">
+					<label>2.</label>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite ime kuma/kume" path="imeKuma2" />
+						<springForm:errors path="imeKuma2" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite prezime kuma/kume" path="prezimeKuma2" />
+						<springForm:errors path="prezimeKuma2" cssClass="form-error" />
+					</div>
+					<div class="col-md-3">
+						<springForm:input type="text" class="form-control"
+							placeholder="Unesite crkvu/župu kuma/kume" path="zupaKuma2" />
+						<springForm:errors path="zupaKuma2" cssClass="form-error" />
+					</div>
 				</div>
-				<div class="col-md-3">
-					<springForm:input type="text" class="form-control"
-						placeholder="Unesite crkvu/župu kuma/kume" path="zupaKuma2" />
-					<springForm:errors path="zupaKuma2" cssClass="form-error" />
-				</div>
-			</div>
 
-			<br>
-			<h4 class="text-center">
-				Za kumove <b>znamo da su katolici</b>(primili svete sakramente:
-				krštenje, potvrdu/krizmu);<br> <b>prakticiraju svoju
-					vjeru(mole se, idu nedeljom na svetu misu, ispovjedaju se o Uskrsu
-					i Božiću).<br>
-				</b> <i>Kumovi koju su <b>oženjeni</b> trebaju biti crkveno vjenčani
-					i živjeti u tom braku.
-				</i>
-			</h4>
+				<br>
+				<h4 class="text-center">
+					Za kumove <b>znamo da su katolici</b>(primili svete sakramente:
+					krštenje, potvrdu/krizmu);<br> <b>prakticiraju svoju
+						vjeru(mole se, idu nedeljom na svetu misu, ispovjedaju se o Uskrsu
+						i Božiću).<br>
+					</b> <i>Kumovi koju su <b>oženjeni</b> trebaju biti crkveno
+						vjenčani i živjeti u tom braku.
+					</i>
+				</h4>
 
-			<br>
-			<h4 class="text-center">
-				<i><b>Spremni smo doći na pripravu za krštenje dijeteta dva
-						dana prije krštenja (</b>četvrtak<b>) u 17:30 sati ili po
-						dogovoru.</b></i>
-			</h4>
+				<br>
+				<h4 class="text-center">
+					<i><b>Spremni smo doći na pripravu za krštenje dijeteta dva
+							dana prije krštenja (</b>četvrtak<b>) u 17:30 sati ili po
+							dogovoru.</b></i>
+				</h4>
 
-			<br>
-			<h4 class="text-center">
-				<u>P.S. <i><b>Nema takse za krštenje.</i> Darujte nešto za
-					crkvu. Hvala. </b></u>
-			</h4>
+				<br>
+				<h4 class="text-center">
+					<u>P.S. <b><i>Nema takse za krštenje.</i> Darujte nešto za
+							crkvu. Hvala. </b></u>
+				</h4>
 
-			<br> <label>Izvod iz matice rođenih</label>(fotokopija)
+				<c:if test="${not isFormDisabled}">
+					<br>
+					<label>Izvod iz matice rođenih</label>(fotokopija)
 			<div class="form-group">
-				<input type="file" name="izvodMaticnaKnjiga" />
-			</div>
-			<springForm:errors path="izvodMaticnaKnjiga" cssClass="form-error" />
+						<input type="file" name="izvodMaticnaKnjiga" />
+					</div>
+					<springForm:errors path="izvodMaticnaKnjiga" cssClass="form-error" />
 
-			<label>Posvjedočenje za kumove</label>(od njihovog župnika)
+					<label>Posvjedočenje za kumove</label>(od njihovog župnika)
 			<div class="form-group">
-				<input type="file" name="posvjedocenjeZaKumove" />
-			</div>
-			<springForm:errors path="posvjedocenjeZaKumove" cssClass="form-error" />
+						<input type="file" name="posvjedocenjeZaKumove" />
+						<springForm:errors path="posvjedocenjeZaKumove"
+							cssClass="form-error" />
+					</div>
 
-			<label>Suglasnost našeg župnika</label>(ako roditelji ne stanuju u
+					<label>Suglasnost našeg župnika</label>(ako roditelji ne stanuju u
 			župi gdje se dijete krsti)
 			<div class="form-group">
-				<input type="file" name="posvjedocenjeZaKumove" />
-			</div>
-			<springForm:errors path="posvjedocenjeZaKumove" cssClass="form-error" />
+						<input type="file" name="suglasnostNasegZupnika" />
+						<springForm:errors path="suglasnostNasegZupnika"
+							cssClass="form-error" />
+					</div>
 
-			<!-- Ako ovako stavite submit button, automatski će raditi -->
-			<button type="submit" class="btn btn-primary">Spremi</button>
+					<!-- Ako ovako stavite submit button, automatski će raditi -->
+					<button type="submit" class="btn btn-primary">Spremi</button>
+				</c:if>
 			</springForm:form>
 		</div>
 	</div>
-	</div>
 
 	<script>
-		
+		var isDisabledTag = $("#isDisabled");
+		var isDisabledText = isDisabledTag.text();
+		var isDisabled = isDisabledText != "" && isDisabledText != null;
+		if (isDisabled) {
+			$("input").attr("disabled", "disabled");
+			$("form").attr("action", "");
+		}
 	</script>
 </body>
 </html>

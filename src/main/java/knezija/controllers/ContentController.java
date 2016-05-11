@@ -16,6 +16,7 @@ import javax.validation.Valid;
 
 import knezija.models.Content;
 import knezija.models.forms.ContentForm;
+import knezija.models.forms.PostForm;
 import knezija.services.IContentManager;
 import knezija.services.IUserManager;
 import knezija.utilities.ContentTypes;
@@ -32,7 +33,9 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
 public class ContentController {
@@ -40,6 +43,79 @@ public class ContentController {
 	private IContentManager contentManager;
 	@Autowired
 	private IUserManager userManager;
+	
+	@RequestMapping("/collections/{superCollectionId}/create-post-view")
+	public String displayCreatePostView(Map<String, Object> model,
+			@PathVariable("superCollectionId") String superCollectionId,
+			HttpServletRequest req) {
+		long longSuperId = Long.parseLong(superCollectionId);
+		
+		ContentForm form = new PostForm();
+		form.setAuthor(userManager.getUser(req).getUsername());
+		model.put("postForm", form);
+		
+		populateCreateContentView(model, longSuperId);
+		return "createPost";
+	}
+	
+	@RequestMapping(value = "/collections/{superCollectionId}/create-post-view/create", method = RequestMethod.POST)
+	public String createPost(Map<String, Object> model,
+			@RequestParam("editorHtml") String editorHTML,
+			@Valid @ModelAttribute("postForm") PostForm postForm,
+			BindingResult result,
+			@PathVariable("superCollectionId") String superCollectionId,
+			HttpServletRequest req) {
+
+		
+		long superId = Long.parseLong(superCollectionId);
+//		PostForm postForm = new PostForm();
+//		postForm.setEditorHtml(editorHTML);
+		//treba ovaj null zamijenit
+		if(contentManager.checkValidOnCreate(postForm, result, superId)) {
+			Content content = contentManager.createPost(postForm, superId);
+			return "redirect:/collections/" + superId;
+		} else {
+			populateCreateContentView(model, superId);
+			return "createPost";
+		}
+	}
+	
+	@RequestMapping("/collections/{superCollectionId}/update-post-view/{id}")
+	public String displayUpdatePostView(Map<String, Object> model,
+			@PathVariable("superCollectionId") String superCollectionId,
+			@PathVariable("id") String postId, HttpServletRequest req) {
+		long longSuperId = Long.parseLong(superCollectionId);
+		long id = Long.parseLong(postId);
+
+		Content content = contentManager.findContentById(id);
+		PostForm form = (PostForm) contentManager.createFromContent(content);
+		model.put("postForm", form);
+
+		model.put("id", id);
+		populateCreateContentView(model, longSuperId);
+		return "createPost";
+	}
+
+	@RequestMapping(value = "/collections/{superCollectionId}/update-post-view/{id}/update", method = RequestMethod.POST)
+	public String updatePostContent(Map<String, Object> model,
+			@Valid @ModelAttribute("postForm") PostForm form,
+			BindingResult result,
+			@PathVariable("superCollectionId") String superCollectionId,
+			@PathVariable("id") String postId, HttpServletRequest req) {
+
+		long superId = Long.parseLong(superCollectionId);
+		long id = Long.parseLong(postId);
+
+		if (contentManager.checkValidOnUpdate(form, result)) {
+			contentManager.updatePost(form, id);
+			model.put("contentUpdatedMessage",
+					"Uspješno ste izmijenili objavu.");
+		}
+
+		model.put("id", id);
+		populateCreateContentView(model, superId);
+		return "createPost";
+	}
 
 	@RequestMapping("/collections/{superCollectionId}/create-content-view")
 	public String displayCreateContentView(Map<String, Object> model,

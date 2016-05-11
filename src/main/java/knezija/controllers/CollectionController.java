@@ -2,8 +2,10 @@ package knezija.controllers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -33,8 +35,8 @@ public class CollectionController {
 	public CollectionController() {
 	}
 
-	//dodati da se može sortirati po nekim parametrima
-	//parametri se prenose kao atributi
+	// dodati da se može sortirati po nekim parametrima
+	// parametri se prenose kao atributi
 	/**
 	 * Returns a view which displays all the collections in a gallery like(or
 	 * system explorer like) view.
@@ -49,6 +51,27 @@ public class CollectionController {
 
 		populateCollectionView(model, longId);
 		return "collectionView";
+	}
+
+	/**
+	 * Displays all the collection content like a feed, one content beneath the
+	 * other. The first displayed content will be the newest created content,
+	 * and the last will be the oldest created content if the newestToOldest is
+	 * true for the collection. Otherwise, the order will be opposite(oldest to
+	 * newest). The order of content will not change when the content is
+	 * updated.
+	 *
+	 * @param model
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping("/collections/{id}/feed")
+	public String displayCollectionFeed(Map<String, Object> model,
+			@PathVariable("id") String id) {
+		long longId = Long.parseLong(id);
+
+		populateCollectionFeed(model, longId);
+		return "collectionFeedView";
 	}
 
 	/**
@@ -70,6 +93,24 @@ public class CollectionController {
 		model.put("contentList", collectionContent);
 		model.put("subCollectionsList", collection.getSubCollections());
 		model.put("collection", collection);
+	}
+
+	private void populateCollectionFeed(Map<String, Object> model, long longId) {
+		populateCollectionView(model, longId);
+		List<Content> content = (List<Content>) model.get("contentList");
+		Kolekcija collection = (Kolekcija) model.get("collection");
+		Comparator<Content> comparator = (c1, c2) -> Long.valueOf(c1.getId())
+				.compareTo(c2.getId());
+		comparator = collection.isNewestToOldest() ? comparator.reversed()
+				: comparator;
+
+		model.put(
+				"allContent",
+				content.stream()
+						.map((cont) -> contentManager.createFromContent(cont))
+						.collect(Collectors.toList()));
+
+		Collections.sort(content, comparator);
 	}
 
 	@RequestMapping("/collections/{superCollectionId}/create")

@@ -1,5 +1,7 @@
 package knezija.models.forms;
 
+import knezija.models.Content;
+
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +20,10 @@ public class ContentForm {
 	private String contentLocation;
 	private String url;
 	private MultipartFile file;
+	
+	private String extraParam;
+	
+	private String typeName;
 
 	public String getTitle() {
 		return title;
@@ -75,4 +81,22 @@ public class ContentForm {
 		this.contentLocation = contentLocation;
 	}
 
+	public void updateTypeSpecificsFromContent(Content content) {
+	}
+
+	public String getExtraParam() {
+		return extraParam;
+	}
+
+	public void setExtraParam(String extraParam) {
+		this.extraParam = extraParam;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
+	}
 }

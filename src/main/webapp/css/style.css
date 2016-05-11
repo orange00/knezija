@@ -34,3 +34,19 @@
 	top: 5%;
 	right: 5%;
 }
+
+.synchronized-with-success {
+	background: green;
+}
+
+.synchronized-with-error {
+	background-color: red;
+}
+
+.image-upload>input {
+	display: none;
+}
+
+.no-display {
+	display: none;
+}

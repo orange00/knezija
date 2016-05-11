@@ -20,10 +20,16 @@ import knezija.models.Content;
 import knezija.models.Kolekcija;
 import knezija.models.forms.CollectionForm;
 import knezija.models.forms.ContentForm;
+import knezija.models.forms.PostForm;
+import knezija.services.ContentManager;
+import knezija.services.IContentManager;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
 public class ContentTypes {
+	private static IContentManager contentManager = new ContentManager();
 
 	public static String probeMimeFromUrl(String urlname) {
 		String testUrl = urlname.toLowerCase();
@@ -62,6 +68,8 @@ public class ContentTypes {
 			return "Slika";
 		} else if (contentType.contains("audio")) {
 			return "Audio";
+		}else if(contentType.contains("html")) {
+			return "Objava";
 		} else {
 			if (VideoParser.isVideoUrl(urlName)) {
 				return "Video";
@@ -97,7 +105,7 @@ public class ContentTypes {
 	
 	public static boolean compareContentTypes(ContentForm form,
 			Kolekcija superCollection, BindingResult result) {
-		String contentType = getMimeFromForm(form);
+		String contentType = getContentTypeDatabaseNameFromForm(form);
 		List<String> superContentTypes = getNames(superCollection
 				.getCollectionContentTypesList());
 
@@ -109,9 +117,15 @@ public class ContentTypes {
 		return isValid;
 	}
 
-	private static String getMimeFromForm(ContentForm form) {
-		// TODO Auto-generated method stub
-		return null;
+	public static String getContentTypeDatabaseNameFromForm(ContentForm form) {
+		if(form instanceof PostForm && ((PostForm)form).getEditorHtml()!=null) {
+			return "Objava";
+		}
+		if(contentManager.formIsFile(form)) {
+			return getDatabaseNameFromMime(form.getFile().getContentType(), "");
+		} else {
+			return getDatabaseNameFromMime(probeMimeFromUrl(form.getUrl()), form.getUrl());
+		}
 	}
 
 	public static List<String> getNames(

@@ -1,6 +1,7 @@
 package knezija.services;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
+
+import net.fortuna.ical4j.model.component.Standard;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +26,9 @@ import knezija.models.Kolekcija;
 import knezija.models.User;
 import knezija.models.forms.CollectionForm;
 import knezija.models.forms.ContentForm;
+import knezija.models.forms.PostForm;
 import knezija.persistence.IDao;
+import knezija.utilities.Constants;
 import knezija.utilities.ContentTypes;
 import knezija.utilities.VideoParser;
 
@@ -73,7 +78,7 @@ public class ContentManager implements IContentManager {
 			collectionContentTypes.add(collectionContentType);
 		}
 		collection.setCollectionContentTypesList(collectionContentTypes);
-
+		
 		return collection;
 	}
 
@@ -168,35 +173,98 @@ public class ContentManager implements IContentManager {
 	}
 
 	@Override
-	public boolean checkValidOnCreate(ContentForm form, BindingResult result, long superCollectionId) {
+	public boolean checkValidOnCreate(ContentForm form, BindingResult result,
+			long superCollectionId) {
 		if (!checkValidOnUpdate(form, result)) {
 			return false;
 		}
 
-		if (form.getContentLocation().equals(
-				ContentManager.urlOrFileNames.get(1))) {
-			if (form.getFile() == null || form.getFile().isEmpty()) {
-				result.rejectValue("file", "", "Morate odabrati datoteku!");
-				return false;
+		if (!(form instanceof PostForm)) {
+			if (form.getContentLocation().equals(
+					ContentManager.urlOrFileNames.get(1))) {
+				if (form.getFile() == null || form.getFile().isEmpty()) {
+					result.rejectValue("file", "", "Morate odabrati datoteku!");
+					return false;
+				}
 			}
 		}
-		
+
 		Kolekcija superCollection = findCollectionById(superCollectionId);
-		boolean contentTypesValid = ContentTypes.compareContentTypes(form, superCollection, result);
+		boolean contentTypesValid = ContentTypes.compareContentTypes(form,
+				superCollection, result);
+		if (!contentTypesValid) {
+			result.rejectValue("file", "",
+					"Trenutna mapa ne podržava odabrani tip sadržaja!");
+		}
 
 		return true;
 	}
 
 	@Override
+	public Content createPost(PostForm postForm, long superId) {
+		//only on create
+		Content content = preUpdateContent(postForm, superId);
+
+		//on create and update
+		postChanged(content, postForm);
+		
+		//only on create
+		updatePostSpecificFields(content, postForm);
+
+		return dao.update(content);
+	}
+	
+	private void postChanged(Content content, PostForm postForm) {
+		updateContentNamedFields(content, postForm);
+		updatePostHtml(content, postForm.getEditorHtml());
+	}
+
+	@Override
+	public Content updatePost(PostForm form, long id) {
+		Content content = findContentById(id);
+		postChanged(content, form);
+		return dao.update(content);
+	}
+
+	private void updatePostSpecificFields(Content content, PostForm postForm) {
+		content.setUrlContent(false);
+		String contentTypeDatabaseName = ContentTypes
+				.getContentTypeDatabaseNameFromForm(postForm);
+		ContentType type = dao.find(ContentType.class, "typeName",
+				contentTypeDatabaseName);
+		content.setType(type);
+		content.setMimeType("text/html");
+	}
+
+	private void updatePostHtml(Content postContent, String editorHtml) {
+		editorHtml = editorHtml.replace("\n", "").replace("\r", "");
+		postContent.setBinaryContent(editorHtml
+				.getBytes(StandardCharsets.UTF_8));
+	}
+
+	private void updateContentNamedFields(Content content, ContentForm form) {
+		content.setDescription(form.getDescription());
+		content.setLastUpdated(new Date());
+		content.setPublicContent(form.getPublicContent().equals("Javna"));
+		content.setTitle(form.getTitle());
+	}
+
+	@Override
 	public Content createFromForm(ContentForm form, long superId) {
+		Content content = preUpdateContent(form, superId);
+
+		contentChanged(content, form);
+		return dao.update(content);
+	}
+
+	private Content preUpdateContent(ContentForm form, long superId) {
 		Content content = new Content();
 		Kolekcija superCollection = findCollectionById(superId);
 		content.setCollection(superCollection);
 		User author = userManager.findByUsername(form.getAuthor());
 		content.setAuthor(author);
 
-		contentChanged(content, form);
-		return dao.update(content);
+		return content;
 	}
 
 	@Override
@@ -209,51 +277,55 @@ public class ContentManager implements IContentManager {
 	private void contentChanged(Content content, ContentForm form) {
 		boolean contentTypePossiblyChanged = true;
 		String contentType = "";
-		
+
 		boolean isUrl = false;
 		String url = "";
 		byte[] binary = new byte[0];
-		//file selected
-		if(form.getContentLocation().equals(urlOrFileNames.get(1))) {
+		// file selected
+		if (formIsFile(form)) {
 			MultipartFile file = form.getFile();
-			//new file selected
-			if(file!=null && !file.isEmpty()) {
+			// new file selected
+			if (file != null && !file.isEmpty()) {
 				try {
 					binary = file.getBytes();
 				} catch (IOException ignorable) {
 				}
 				contentType = file.getContentType();
-				
-				//no file selected on update, keep the old file
+
+				// no file selected on update, keep the old file
 			} else {
 				binary = content.getBinaryContent();
 				contentTypePossiblyChanged = false;
 			}
-		//url selected
+			// url selected
 		} else {
 			url = form.getUrl();
 			isUrl = true;
 			contentType = ContentTypes.probeMimeFromUrl(url);
 		}
 		content.setBinaryContent(binary);
-		if(contentTypePossiblyChanged) {
-			String databaseTypeName = ContentTypes.getDatabaseNameFromMime(contentType, url);
-			ContentType type = dao.find(ContentType.class, "typeName", databaseTypeName);
+		if (contentTypePossiblyChanged) {
+			String databaseTypeName = ContentTypes.getDatabaseNameFromMime(
+					contentType, url);
+			ContentType type = dao.find(ContentType.class, "typeName",
+					databaseTypeName);
 			content.setType(type);
 			content.setMimeType(contentType);
 		}
-		
-		content.setDescription(form.getDescription());
-		content.setLastUpdated(new Date());
-		content.setPublicContent(form.getPublicContent().equals("Javna"));
-		content.setTitle(form.getTitle());
+
+		updateContentNamedFields(content, form);
 		content.setUrl(url);
 		content.setUrlContent(isUrl);
-		
-		if(ContentTypes.isVideo(content)) {
+
+		if (ContentTypes.isVideo(content)) {
 			String dataYoutube = VideoParser.getDataYoutube(url);
 			content.setExtraParam(dataYoutube);
 		}
+	}
+
+	@Override
+	public boolean formIsFile(ContentForm form) {
+		return form.getContentLocation().equals(urlOrFileNames.get(1));
 	}
 
 	@Override
@@ -262,15 +334,18 @@ public class ContentManager implements IContentManager {
 	}
 
 	@Override
-	public ContentForm createFromContent(Content content) {
-		ContentForm form = new ContentForm();
+	public PostForm createFromContent(Content content) {
+		PostForm form = new PostForm();
 		form.setAuthor(content.getAuthor().getUsername());
-		form.setContentLocation(content.isUrlContent() ? urlOrFileNames.get(0) : urlOrFileNames.get(1));
+		form.setContentLocation(content.isUrlContent() ? urlOrFileNames.get(0)
+				: urlOrFileNames.get(1));
 		form.setDescription(content.getDescription());
 		form.setPublicContent(content.isPublicContent() ? "Javna" : "Privatna");
 		form.setTitle(content.getTitle());
 		form.setUrl(content.getUrl());
 		
+		form.updateTypeSpecificsFromContent(content);
+
 		return form;
 	}
 
@@ -296,5 +371,10 @@ public class ContentManager implements IContentManager {
 	public void deleteContent(long id) {
 		Content content = dao.findById(Content.class, id);
 		dao.remove(content);
+	}
+
+	@Override
+	public List<Content> getAllHomepagePosts() {
+		return dao.findAll(Content.class, "collection.id", Constants.HOMEPAGE_POSTS_ID);
 	}
 }

@@ -6,7 +6,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.web.multipart.MultipartFile;
 
-public class KrstenjeForm {
+public class KrstenjeForm extends SynchronizableForm{
 	private long id;
 	
 	@NotEmpty(message = "Ovo polje je obavezno!")
@@ -83,6 +83,8 @@ public class KrstenjeForm {
 
 	@Email
 	private String email;
+	
+	private boolean isArchive;
 
 	public String getImeOca() {
 		return imeOca;
@@ -386,5 +388,13 @@ public class KrstenjeForm {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public boolean isArchive() {
+		return isArchive;
+	}
+
+	public void setArchive(boolean isArchive) {
+		this.isArchive = isArchive;
 	}
 }

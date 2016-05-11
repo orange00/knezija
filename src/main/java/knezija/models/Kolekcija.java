@@ -49,6 +49,9 @@ public class Kolekcija {
 	@Column(nullable = false)
 	private boolean publicCollection;
 	
+	@Column(nullable = false)
+	private boolean newestToOldest;
+	
 	/**
 	 * Lista svih odabranih tipova sadržaja za ovu kolekciju.
 	 */
@@ -145,5 +148,13 @@ public class Kolekcija {
 
 	public void setPublicCollection(boolean publicCollection) {
 		this.publicCollection = publicCollection;
+	}
+
+	public boolean isNewestToOldest() {
+		return newestToOldest;
+	}
+
+	public void setNewestToOldest(boolean newestToOldest) {
+		this.newestToOldest = newestToOldest;
 	}
 }

@@ -76,9 +76,9 @@ public class Dao implements IDao {
 			if (attributeValue instanceof String) {
 				attributeValue = "'" + attributeValue + "'";
 			}
-			query += attributeValue + ",";
+			query += attributeValue + " AND ";
 		}
-		query = query.substring(0, query.length() - 1);
+		query = query.substring(0, query.length() - 5);
 
 		return entityManager.createQuery(query, entityClass).getResultList();
 	}
@@ -98,6 +98,28 @@ public class Dao implements IDao {
 	}
 	
 	@Override
+	public <T> List<T> findAll(Class<T> entityClass, String fieldName1,
+			Object fieldValue1, String fieldName2, Object fieldValue2) {
+		Map<String, Object> fieldValueByName = new HashMap<>();
+		fieldValueByName.put(fieldName1, fieldValue1);
+		fieldValueByName.put(fieldName2, fieldValue2);
+
+		return findAll(entityClass, fieldValueByName);
+	}
+
+	@Override
+	public <T> List<T> findAll(Class<T> entityClass, String fieldName1,
+			Object fieldValue1, String fieldName2, Object fieldValue2,
+			String fieldName3, Object fieldValue3) {
+		Map<String, Object> fieldValueByName = new HashMap<>();
+		fieldValueByName.put(fieldName1, fieldValue1);
+		fieldValueByName.put(fieldName2, fieldValue2);
+		fieldValueByName.put(fieldName3, fieldValue3);
+
+		return findAll(entityClass, fieldValueByName);
+	}
+
+	@Override
 	public <T> void removeById(Class<T> entityClass, long id) {
 		remove(findById(entityClass, id));
 	}
@@ -110,5 +132,16 @@ public class Dao implements IDao {
 	// setup on DatabaseConfig class.
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	@Override
+	public <T> List<T> findAllWithAddition(Class<T> entityClass,
+			String fieldName, Object fieldValue, String sqlAddition) {
+		String quoteAddition = (fieldValue instanceof String) ? "'" : "";
+		String query = "from " + entityClass.getSimpleName() + " WHERE "
+				+ fieldName + "=" + quoteAddition + fieldValue + quoteAddition
+				+ " " + sqlAddition;
+
+		return entityManager.createQuery(query, entityClass).getResultList();
+	}
 
 } // class UserDao
